@@ -1,0 +1,6 @@
+.vscode
+/dist
+/build
+/bin
+$HOME
+coverage.*
