@@ -33,7 +33,7 @@ var (
 		},
 		{
 			inputFile:     "tests/invalid.go",
-			outputFile:    "tests/invalid_fakes.go",
+			outputFile:    "",
 			interfaces:    []string{"InvalidInterface"},
 			packageName:   "tests/invalid",
 			shouldError:   true,
