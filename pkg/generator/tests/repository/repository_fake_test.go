@@ -1,6 +1,7 @@
 package repository_test
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -92,11 +93,12 @@ func TestRepositoryFake(t *testing.T) {
 	})
 	t.Run("when updating a user", func(t *testing.T) {
 		// Setup
-		repo.OnUpdateUser(func(old repository.User, new repository.User) error {
+		repo.OnUpdateUser(func(ctx context.Context, old, new repository.User) error {
 			return nil
 		})
+		ctx := context.Background()
 		// Test
-		err := repo.UpdateUser(user1, user2)
+		err := repo.UpdateUser(ctx, user1, user2)
 		if err != nil {
 			t.Errorf("expected no error but got %v", err)
 		}
@@ -106,8 +108,9 @@ func TestRepositoryFake(t *testing.T) {
 		repo.OnExecute(func(user repository.User) error {
 			return nil
 		})
+		ctx := context.Background()
 		// Test
-		err := repo.Execute(user1)
+		err := repo.Execute(ctx, user1)
 		if err != nil {
 			t.Errorf("expected no error but got %v", err)
 		}
