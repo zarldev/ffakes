@@ -77,45 +77,31 @@ func OnFindUserByName(fn ...FindUserByNameFunc) UserRepositoryOption {
 }
 
 func (f *FakeUserRepository) OnGetAllUsers(fns ...GetAllUsersFunc) {
-	for _, fn := range fns {
-		f.FGetAllUsers = append(f.FGetAllUsers, fn)
-	}
+	f.FGetAllUsers = append(f.FGetAllUsers, fns...)
 }
 
 func (f *FakeUserRepository) OnFindUserByID(fns ...FindUserByIDFunc) {
-	for _, fn := range fns {
-		f.FFindUserByID = append(f.FFindUserByID, fn)
-	}
+	f.FFindUserByID = append(f.FFindUserByID, fns...)
 }
 
 func (f *FakeUserRepository) OnCreateUser(fns ...CreateUserFunc) {
-	for _, fn := range fns {
-		f.FCreateUser = append(f.FCreateUser, fn)
-	}
+	f.FCreateUser = append(f.FCreateUser, fns...)
 }
 
 func (f *FakeUserRepository) OnDeleteUserByID(fns ...DeleteUserByIDFunc) {
-	for _, fn := range fns {
-		f.FDeleteUserByID = append(f.FDeleteUserByID, fn)
-	}
+	f.FDeleteUserByID = append(f.FDeleteUserByID, fns...)
 }
 
 func (f *FakeUserRepository) OnUpdateUser(fns ...UpdateUserFunc) {
-	for _, fn := range fns {
-		f.FUpdateUser = append(f.FUpdateUser, fn)
-	}
+	f.FUpdateUser = append(f.FUpdateUser, fns...)
 }
 
 func (f *FakeUserRepository) OnExecute(fns ...ExecuteFunc) {
-	for _, fn := range fns {
-		f.FExecute = append(f.FExecute, fn)
-	}
+	f.FExecute = append(f.FExecute, fns...)
 }
 
 func (f *FakeUserRepository) OnFindUserByName(fns ...FindUserByNameFunc) {
-	for _, fn := range fns {
-		f.FFindUserByName = append(f.FFindUserByName, fn)
-	}
+	f.FFindUserByName = append(f.FFindUserByName, fns...)
 }
 
 func NewFakeUserRepository(t *testing.T, opts ...UserRepositoryOption) *FakeUserRepository {

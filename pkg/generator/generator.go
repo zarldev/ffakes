@@ -184,9 +184,7 @@ func writeStructOptionFuncs(w io.StringWriter, i InterfaceInfo) {
 	iname := i.Name
 	for _, m := range i.Methods {
 		write(w, fmt.Sprintf("func (f *Fake%s) On%s(fns ...%sFunc) {\n", iname, m.Name, m.Name))
-		write(w, "for _, fn := range fns {\n")
-		write(w, fmt.Sprintf("\tf.F%s = append(f.F%s, fn)\n", m.Name, m.Name))
-		write(w, "}\n")
+		write(w, fmt.Sprintf("\t\tf.F%s = append(f.F%s, fns...)\n", m.Name, m.Name))
 		write(w, "}\n\n")
 	}
 }

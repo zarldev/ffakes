@@ -22,9 +22,7 @@ func OnPublishMessage(fn ...PublishMessageFunc) PublisherOption {
 }
 
 func (f *FakePublisher) OnPublishMessage(fns ...PublishMessageFunc) {
-	for _, fn := range fns {
-		f.FPublishMessage = append(f.FPublishMessage, fn)
-	}
+	f.FPublishMessage = append(f.FPublishMessage, fns...)
 }
 
 func NewFakePublisher(t *testing.T, opts ...PublisherOption) *FakePublisher {
@@ -69,9 +67,7 @@ func OnSubscribeToMessages(fn ...SubscribeToMessagesFunc) SubscriberOption {
 }
 
 func (f *FakeSubscriber) OnSubscribeToMessages(fns ...SubscribeToMessagesFunc) {
-	for _, fn := range fns {
-		f.FSubscribeToMessages = append(f.FSubscribeToMessages, fn)
-	}
+	f.FSubscribeToMessages = append(f.FSubscribeToMessages, fns...)
 }
 
 func NewFakeSubscriber(t *testing.T, opts ...SubscriberOption) *FakeSubscriber {
@@ -132,21 +128,15 @@ func BrokerOnSubscribeToMessages(fn ...SubscribeToMessagesFunc) BrokerOption {
 }
 
 func (f *FakeBroker) OnBrokerConnection(fns ...BrokerConnectionFunc) {
-	for _, fn := range fns {
-		f.FBrokerConnection = append(f.FBrokerConnection, fn)
-	}
+	f.FBrokerConnection = append(f.FBrokerConnection, fns...)
 }
 
 func (f *FakeBroker) OnPublishMessage(fns ...PublishMessageFunc) {
-	for _, fn := range fns {
-		f.FPublishMessage = append(f.FPublishMessage, fn)
-	}
+	f.FPublishMessage = append(f.FPublishMessage, fns...)
 }
 
 func (f *FakeBroker) OnSubscribeToMessages(fns ...SubscribeToMessagesFunc) {
-	for _, fn := range fns {
-		f.FSubscribeToMessages = append(f.FSubscribeToMessages, fn)
-	}
+	f.FSubscribeToMessages = append(f.FSubscribeToMessages, fns...)
 }
 
 func NewFakeBroker(t *testing.T, opts ...BrokerOption) *FakeBroker {
