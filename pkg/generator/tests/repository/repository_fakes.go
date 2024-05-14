@@ -8,12 +8,14 @@ import (
 
 type FakeUserRepository struct {
 	t                   *testing.T
+	GetAllUsersCount    int
 	FindUserByIDCount   int
 	CreateUserCount     int
 	DeleteUserByIDCount int
 	UpdateUserCount     int
 	ExecuteCount        int
 	FindUserByNameCount int
+	FGetAllUsers        []func() ([]User, error)
 	FFindUserByID       []func(id int) (u User, err error)
 	FCreateUser         []func(user User) error
 	FDeleteUserByID     []func(id int) error
@@ -22,6 +24,7 @@ type FakeUserRepository struct {
 	FFindUserByName     []func(name string) (User, error)
 }
 
+type GetAllUsersFunc = func() ([]User, error)
 type FindUserByIDFunc = func(id int) (u User, err error)
 type CreateUserFunc = func(user User) error
 type DeleteUserByIDFunc = func(id int) error
@@ -29,6 +32,12 @@ type UpdateUserFunc = func(old, new User) error
 type ExecuteFunc = func(user User) error
 type FindUserByNameFunc = func(name string) (User, error)
 type UserRepositoryOption func(f *FakeUserRepository)
+
+func OnGetAllUsers(fn ...GetAllUsersFunc) UserRepositoryOption {
+	return func(f *FakeUserRepository) {
+		f.FGetAllUsers = append(f.FGetAllUsers, fn...)
+	}
+}
 
 func OnFindUserByID(fn ...FindUserByIDFunc) UserRepositoryOption {
 	return func(f *FakeUserRepository) {
@@ -63,6 +72,12 @@ func OnExecute(fn ...ExecuteFunc) UserRepositoryOption {
 func OnFindUserByName(fn ...FindUserByNameFunc) UserRepositoryOption {
 	return func(f *FakeUserRepository) {
 		f.FFindUserByName = append(f.FFindUserByName, fn...)
+	}
+}
+
+func (f *FakeUserRepository) OnGetAllUsers(fns ...GetAllUsersFunc) {
+	for _, fn := range fns {
+		f.FGetAllUsers = append(f.FGetAllUsers, fn)
 	}
 }
 
@@ -108,6 +123,9 @@ func NewFakeUserRepository(t *testing.T, opts ...UserRepositoryOption) *FakeUser
 		opt(f)
 	}
 	t.Cleanup(func() {
+		if f.GetAllUsersCount != len(f.FGetAllUsers) {
+			t.Fatalf("expected GetAllUsers to be called %d times but got %d", len(f.FGetAllUsers), f.GetAllUsersCount)
+		}
 		if f.FindUserByIDCount != len(f.FFindUserByID) {
 			t.Fatalf("expected FindUserByID to be called %d times but got %d", len(f.FFindUserByID), f.FindUserByIDCount)
 		}
@@ -128,6 +146,19 @@ func NewFakeUserRepository(t *testing.T, opts ...UserRepositoryOption) *FakeUser
 		}
 	})
 	return f
+}
+
+func (f *FakeUserRepository) GetAllUsers() ([]User, error) {
+	var idx = f.GetAllUsersCount
+	if f.GetAllUsersCount >= len(f.FGetAllUsers) {
+		idx = len(f.FGetAllUsers) - 1
+	}
+	if len(f.FGetAllUsers) != 0 {
+		o1, o2 := f.FGetAllUsers[idx]()
+		f.GetAllUsersCount++
+		return o1, o2
+	}
+	return nil, nil
 }
 
 func (f *FakeUserRepository) FindUserByID(id int) (u User, err error) {

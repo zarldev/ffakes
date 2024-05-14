@@ -373,12 +373,16 @@ type ParamInfo struct {
 	Zero   string
 	IsPtr  bool
 	IsChan bool
+	IsList bool
 }
 
 func (p ParamInfo) TypeString() string {
 	str := strings.Builder{}
 	if p.IsChan {
 		str.WriteString("chan ")
+	}
+	if p.IsList {
+		str.WriteString("[]")
 	}
 	str.WriteString(" ")
 	if p.IsPtr {
@@ -389,10 +393,7 @@ func (p ParamInfo) TypeString() string {
 }
 
 func (p ParamInfo) ZeroValue() string {
-	if p.IsPtr {
-		return "nil"
-	}
-	if p.IsChan {
+	if p.IsPtr || p.IsList || p.IsChan {
 		return "nil"
 	}
 	switch p.Type {
@@ -540,9 +541,9 @@ func buildResults(field *ast.Field, info *FunctionInfo, param ParamInfo) {
 
 func paramInfo(param *ast.Field) (ParamInfo, bool) {
 	var (
-		typeName      string
-		isPtr, isChan bool
-		names         []string
+		typeName              string
+		isPtr, isChan, isList bool
+		names                 []string
 	)
 	if len(param.Names) > 0 {
 		for _, n := range param.Names {
@@ -550,14 +551,23 @@ func paramInfo(param *ast.Field) (ParamInfo, bool) {
 		}
 	}
 	isChan = isChannel(param)
+	isList = isListType(param)
 	typeName, isPtr = valAndIsPointer(param)
 	p := ParamInfo{
 		Name:   names,
 		Type:   typeName,
 		IsPtr:  isPtr,
 		IsChan: isChan,
+		IsList: isList,
 	}
 	return p, true
+}
+
+func isListType(param *ast.Field) bool {
+	if _, ok := param.Type.(*ast.ArrayType); ok {
+		return true
+	}
+	return false
 }
 
 func isChannel(param *ast.Field) bool {
@@ -593,6 +603,8 @@ func valAndIsPointer(field *ast.Field) (string, bool) {
 		return valAndIsPointerExpr(t)
 	case *ast.ChanType:
 		return valAndIsPointerExpr(t.Value)
+	case *ast.ArrayType:
+		return valAndIsPointerExpr(t.Elt)
 	default:
 		return "", false
 	}

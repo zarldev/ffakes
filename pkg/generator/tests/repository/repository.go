@@ -7,6 +7,7 @@ type User struct {
 
 //go:generate ffakes -i UserRepository
 type UserRepository interface {
+	GetAllUsers() ([]User, error)
 	FindUserByID(id int) (u User, err error)
 	CreateUser(user User) error
 	DeleteUserByID(id int) error
