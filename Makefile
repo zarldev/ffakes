@@ -3,8 +3,10 @@ default: help
 
 VERSION := $(shell git describe --tags --abbrev=0)
 LDFLAGS := -ldflags "-X main.version=$(VERSION)"
+GO_FILES := $(shell find . -name '*.go' )
+DIST_DIR := $(shell ls -d dist 2>/dev/null)
 
-build: generate test lint
+build: $(GO_FILES) $(DIST_DIR) generate  lint
 	go mod tidy && go build $(LDFLAGS) --tags prod -o dist/ffakes ffakes.go
 
 build-all: build-mac build-linux build-windows
@@ -34,7 +36,7 @@ install:
 lint:
 	golangci-lint run ./...
 	
-test:
+test: $(GO_FILES)
 	go test -v ./...
 
 generate:

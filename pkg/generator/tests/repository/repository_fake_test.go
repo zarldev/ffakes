@@ -105,7 +105,7 @@ func TestRepositoryFake(t *testing.T) {
 	})
 	t.Run("when executing a user", func(t *testing.T) {
 		// Setup
-		repo.OnExecute(func(user repository.User) error {
+		repo.OnExecute(func(ctx context.Context, user repository.User) error {
 			return nil
 		})
 		ctx := context.Background()
