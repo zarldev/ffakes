@@ -99,15 +99,15 @@ func parseCliFlags() []string {
 	flag.StringVar(&interfaceList, "interfaces", "",
 		"Comma separated list of interfaces to fake")
 	flag.StringVar(&interfaceList, "i", "", "")
-	interfaces := strings.Split(interfaceList, ",")
+
 	flag.StringVar(&output, "output", "",
 		"Output directory for the generated files")
 	flag.StringVar(&output, "o", "", "")
 	flag.BoolVar(&verbose, "vv", false, "")
 	flag.BoolVar(&verbose, "vverbose", false,
 		"Print verbose output")
-
 	flag.Parse()
+	interfaces := strings.Split(interfaceList, ",")
 	return interfaces
 }
 
