@@ -10,22 +10,22 @@ build: generate test lint
 build-all: build-mac build-linux build-windows
 
 build-mac: build
-	GOOS=darwin GOARCH=amd64 go mod tidy && go build $(LDFLAGS) --tags prod -o dist/mac/ffakes ffakes.go
+	GOOS=darwin GOARCH=amd64 go mod tidy && go build $(LDFLAGS) --tags prod -o dist/ffakes ffakes.go
 
 build-linux: build
-	GOOS=linux GOARCH=amd64 go mod tidy && go build $(LDFLAGS) --tags prod -o dist/linux/ffakes ffakes.go
+	GOOS=linux GOARCH=amd64 go mod tidy && go build $(LDFLAGS) --tags prod -o dist/ffakes ffakes.go
 
 build-windows: build
-	GOOS=windows GOARCH=amd64 go mod tidy && go build $(LDFLAGS) --tags prod -o dist/windows/ffakes.exe ffakes.go
+	GOOS=windows GOARCH=amd64 go mod tidy && go build $(LDFLAGS) --tags prod -o dist/ffakes.exe ffakes.go
 
 releases: build-all
 	@echo "Creating releases"
 	@echo "Creating release for mac"
-	tar -czvf dist/mac/ffakes.mac.$(VERSION).tar.gz dist/mac/ffakes
+	tar -czvf dist/ffakes.mac.$(VERSION).tar.gz dist/ffakes
 	@echo "Creating release for linux"
-	tar -czvf dist/linux/ffakes.linux.$(VERSION).tar.gz dist/linux/ffakes
+	tar -czvf dist/ffakes.linux.$(VERSION).tar.gz dist/ffakes
 	@echo "Creating release for windows"
-	zip -r dist/windows/ffakes.windows.$(VERSION).zip dist/windows/ffakes.exe
+	zip -r dist/ffakes.windows.$(VERSION).zip dist/ffakes.exe
 
 install:
 	chmod +x bin/ffakes
@@ -40,6 +40,10 @@ test:
 generate:
 	go generate ./...
 
+clean:
+	rm -rf dist
+	go clean --testcache
+
 help:
 	@echo "Usage: make [target]"
 	@echo ""
@@ -53,5 +57,6 @@ help:
 	@echo "  install      	 Install the project"
 	@echo "  lint         	 Run linter"
 	@echo "  test         	 Run tests"
+	@echo "  clean        	 Clean the project"
 	@echo "  generate     	 Generate code"
 	@echo "  help         	 Show this help message"
