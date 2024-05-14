@@ -30,11 +30,7 @@ func TestRepositoryFake(t *testing.T) {
 		user2.Name: user2,
 		user3.Name: user3,
 	}
-	repo := repository.NewFakeUserRepository(t,
-		repository.OnCreateUser(func(user repository.User) error {
-			return nil
-		}),
-	)
+	repo := repository.NewFakeUserRepository(t)
 	t.Run("when finding a user by id", func(t *testing.T) {
 		f := repository.FindUserByIDFunc(func(id int) (u repository.User, err error) {
 			user, ok := userIDMap[id]
