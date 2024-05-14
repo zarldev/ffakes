@@ -1,5 +1,7 @@
 package repository
 
+import "context"
+
 type User struct {
 	ID   int
 	Name string
@@ -7,7 +9,7 @@ type User struct {
 
 //go:generate ffakes -i UserRepository
 type UserRepository interface {
-	GetAllUsers() ([]User, error)
+	GetAllUsers(ctx context.Context) ([]User, error)
 	FindUserByID(id int) (u User, err error)
 	CreateUser(user User) error
 	DeleteUserByID(id int) error
