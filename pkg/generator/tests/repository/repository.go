@@ -13,7 +13,7 @@ type UserRepository interface {
 	FindUserByID(id int) (u User, err error)
 	CreateUser(user User) error
 	DeleteUserByID(id int) error
-	UpdateUser(old, new User) error
+	UpdateUser(ctx context.Context, old, new User) error
 	Execute(user User) error
 	FindUserByName(name string) (User, error)
 }
