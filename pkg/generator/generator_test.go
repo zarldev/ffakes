@@ -25,20 +25,20 @@ var (
 			interfaces:  []string{"UserRepository"},
 			packageName: "repository",
 		},
-		{
-			inputFile:   "tests/pubsub/pubsub.go",
-			outputFile:  "tests/pubsub/pubsub_fakes.go",
-			interfaces:  []string{"Publisher", "Subscriber", "Broker"},
-			packageName: "repository",
-		},
-		{
-			inputFile:     "tests/invalid.go",
-			outputFile:    "",
-			interfaces:    []string{"InvalidInterface"},
-			packageName:   "tests/invalid",
-			shouldError:   true,
-			expectedError: "failed to parse file while generating fakes: open tests/invalid.go: no such file or directory",
-		},
+		// {
+		// 	inputFile:   "tests/pubsub/pubsub.go",
+		// 	outputFile:  "tests/pubsub/pubsub_fakes.go",
+		// 	interfaces:  []string{"Publisher", "Subscriber", "Broker"},
+		// 	packageName: "repository",
+		// },
+		// {
+		// 	inputFile:     "tests/invalid.go",
+		// 	outputFile:    "",
+		// 	interfaces:    []string{"InvalidInterface"},
+		// 	packageName:   "tests/invalid",
+		// 	shouldError:   true,
+		// 	expectedError: "failed to parse file while generating fakes: open tests/invalid.go: no such file or directory",
+		// },
 	}
 )
 

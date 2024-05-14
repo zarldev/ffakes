@@ -84,7 +84,7 @@ func generateFakes(i InterfaceGenInfo) error {
 
 func writeAll(w io.StringWriter, igi InterfaceGenInfo) {
 	writeGeneratedComment(w)
-	writeHeader(w, igi.pkg)
+	writeHeader(w, igi)
 	for _, i := range igi.interfaces {
 		writeInterface(w, i)
 	}
@@ -330,10 +330,16 @@ func paramString(p ParamInfo) string {
 	return n.String()
 }
 
-func writeHeader(w io.StringWriter, pkg string) {
-	write(w, fmt.Sprintf("package %s\n\n", pkg))
+func writeHeader(w io.StringWriter, igi InterfaceGenInfo) {
+	write(w, fmt.Sprintf("package %s\n\n", igi.pkg))
 	write(w, "import (\n")
 	write(w, "\t\"testing\"\n")
+	for _, i := range igi.interfaces {
+		for _, imp := range i.Imports {
+			write(w, fmt.Sprintf("\t\"%s\"\n", imp))
+		}
+	}
+
 	write(w, ")\n\n")
 }
 
@@ -358,6 +364,7 @@ type InterfaceInfo struct {
 	Methods     []FunctionInfo
 	IsComposite bool
 	Composites  []string
+	Imports     []string
 }
 
 type FunctionInfo struct {
@@ -428,7 +435,10 @@ func getInterfaceInfo(node *ast.File) []InterfaceInfo {
 						}
 						for _, field := range iType.Methods.List {
 							if len(field.Names) == 0 {
-								val, _ := fieldValueAndIsPointer(field)
+								val, importStr, _ := fieldValueAndIsPointer(field)
+								if importStr != "" {
+									iInfo.Imports = append(iInfo.Imports, importStr)
+								}
 								iInfo.Composites = append(iInfo.Composites, val)
 								iInfo.IsComposite = true
 								continue
@@ -442,25 +452,31 @@ func getInterfaceInfo(node *ast.File) []InterfaceInfo {
 							if f, ok := field.Type.(*ast.FuncType); ok {
 								for _, param := range f.Params.List {
 									params := make([]ParamInfo, 0, len(param.Names))
-									if param, ok := paramInfo(param); ok {
+									if param, importStr, ok := paramInfo(param); ok {
 										params = append(params, param)
 										info.Params = params
+										if importStr != "" {
+											iInfo.Imports = append(iInfo.Imports, importStr)
+										}
 									}
 								}
 								for _, result := range f.Results.List {
 									var (
-										isChan   bool
-										isPtr    bool
-										name     string
-										typeName string
+										isChan, isPtr             bool
+										name, importStr, typeName string
 									)
 									paramType, ok := result.Type.(*ast.Ident)
 									if !ok {
-										if chanResult, ok := paramInfo(result); ok {
+										if chanResult, importStr, ok := paramInfo(result); ok {
 											info.Results = append(info.Results, chanResult)
+											if importStr != "" {
+												iInfo.Imports = append(iInfo.Imports, importStr)
+											}
+
 											continue
 										}
-										if typeName, isPtr = fieldValueAndIsPointer(result); isPtr {
+										if typeName, importStr, isPtr = fieldValueAndIsPointer(result); isPtr || importStr != "" {
+											iInfo.Imports = append(iInfo.Imports, importStr)
 											if len(result.Names) == 0 {
 												info.Results = append(info.Results, ParamInfo{
 													Name:   []string{},
@@ -539,9 +555,9 @@ func buildResults(field *ast.Field, info *FunctionInfo, param ParamInfo) {
 	info.Results = buildList(field, info.Results, param)
 }
 
-func paramInfo(param *ast.Field) (ParamInfo, bool) {
+func paramInfo(param *ast.Field) (ParamInfo, string, bool) {
 	var (
-		typeName              string
+		typeName, importStr   string
 		isPtr, isChan, isList bool
 		names                 []string
 	)
@@ -552,7 +568,7 @@ func paramInfo(param *ast.Field) (ParamInfo, bool) {
 	}
 	isChan = isChannel(param)
 	isList = isListType(param)
-	typeName, isPtr = valAndIsPointer(param)
+	typeName, importStr, isPtr = valAndIsPointer(param)
 	p := ParamInfo{
 		Name:   names,
 		Type:   typeName,
@@ -560,7 +576,7 @@ func paramInfo(param *ast.Field) (ParamInfo, bool) {
 		IsChan: isChan,
 		IsList: isList,
 	}
-	return p, true
+	return p, importStr, true
 }
 
 func isListType(param *ast.Field) bool {
@@ -577,10 +593,11 @@ func isChannel(param *ast.Field) bool {
 	return false
 }
 
-func valAndIsPointerExpr(expr ast.Expr) (string, bool) {
+func valAndIsPointerExpr(expr ast.Expr) (string, string, bool) {
 	var (
 		isPtr    bool
 		typeName string
+		importS  string
 	)
 	if val, ok := expr.(*ast.Ident); ok {
 		isPtr = false
@@ -595,22 +612,34 @@ func valAndIsPointerExpr(expr ast.Expr) (string, bool) {
 			typeName = valX.Sel.Name
 		}
 	}
-	return typeName, isPtr
+	if sel, ok := expr.(*ast.SelectorExpr); ok {
+		isPtr = false
+		switch x := sel.X.(type) {
+		case *ast.Ident:
+			importS = x.Name
+			typeName = x.Name + "." + sel.Sel.Name
+		case *ast.SelectorExpr:
+			typeName = x.Sel.Name + "." + sel.Sel.Name
+		}
+	}
+	return typeName, importS, isPtr
 }
-func valAndIsPointer(field *ast.Field) (string, bool) {
+func valAndIsPointer(field *ast.Field) (string, string, bool) {
 	switch t := field.Type.(type) {
-	case *ast.Ident, *ast.SelectorExpr, *ast.StarExpr:
+	case *ast.Ident, *ast.SelectorExpr, *ast.StarExpr, *ast.FuncType, *ast.InterfaceType, *ast.StructType:
 		return valAndIsPointerExpr(t)
 	case *ast.ChanType:
 		return valAndIsPointerExpr(t.Value)
 	case *ast.ArrayType:
 		return valAndIsPointerExpr(t.Elt)
+	case *ast.MapType:
+		return valAndIsPointerExpr(t.Value)
 	default:
-		return "", false
+		return "", "", false
 	}
 }
 
-func fieldValueAndIsPointer(field *ast.Field) (string, bool) {
+func fieldValueAndIsPointer(field *ast.Field) (string, string, bool) {
 	return valAndIsPointer(field)
 }
 
