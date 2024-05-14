@@ -149,92 +149,92 @@ func NewFakeUserRepository(t *testing.T, opts ...UserRepositoryOption) *FakeUser
 	return f
 }
 
-func (f *FakeUserRepository) GetAllUsers(ctx context.Context) ([]User, error) {
-	var idx = f.GetAllUsersCount
-	if f.GetAllUsersCount >= len(f.FGetAllUsers) {
-		idx = len(f.FGetAllUsers) - 1
+func (fake *FakeUserRepository) GetAllUsers(ctx context.Context) ([]User, error) {
+	var idx = fake.GetAllUsersCount
+	if fake.GetAllUsersCount >= len(fake.FGetAllUsers) {
+		idx = len(fake.FGetAllUsers) - 1
 	}
-	if len(f.FGetAllUsers) != 0 {
-		o1, o2 := f.FGetAllUsers[idx](ctx)
-		f.GetAllUsersCount++
+	if len(fake.FGetAllUsers) != 0 {
+		o1, o2 := fake.FGetAllUsers[idx](ctx)
+		fake.GetAllUsersCount++
 		return o1, o2
 	}
 	return nil, nil
 }
 
-func (f *FakeUserRepository) FindUserByID(id int) (u User, err error) {
-	var idx = f.FindUserByIDCount
-	if f.FindUserByIDCount >= len(f.FFindUserByID) {
-		idx = len(f.FFindUserByID) - 1
+func (fake *FakeUserRepository) FindUserByID(id int) (u User, err error) {
+	var idx = fake.FindUserByIDCount
+	if fake.FindUserByIDCount >= len(fake.FFindUserByID) {
+		idx = len(fake.FFindUserByID) - 1
 	}
-	if len(f.FFindUserByID) != 0 {
-		u, err := f.FFindUserByID[idx](id)
-		f.FindUserByIDCount++
+	if len(fake.FFindUserByID) != 0 {
+		u, err := fake.FFindUserByID[idx](id)
+		fake.FindUserByIDCount++
 		return u, err
 	}
 	return User{}, nil
 }
 
-func (f *FakeUserRepository) CreateUser(user User) error {
-	var idx = f.CreateUserCount
-	if f.CreateUserCount >= len(f.FCreateUser) {
-		idx = len(f.FCreateUser) - 1
+func (fake *FakeUserRepository) CreateUser(user User) error {
+	var idx = fake.CreateUserCount
+	if fake.CreateUserCount >= len(fake.FCreateUser) {
+		idx = len(fake.FCreateUser) - 1
 	}
-	if len(f.FCreateUser) != 0 {
-		o1 := f.FCreateUser[idx](user)
-		f.CreateUserCount++
+	if len(fake.FCreateUser) != 0 {
+		o1 := fake.FCreateUser[idx](user)
+		fake.CreateUserCount++
 		return o1
 	}
 	return nil
 }
 
-func (f *FakeUserRepository) DeleteUserByID(id int) error {
-	var idx = f.DeleteUserByIDCount
-	if f.DeleteUserByIDCount >= len(f.FDeleteUserByID) {
-		idx = len(f.FDeleteUserByID) - 1
+func (fake *FakeUserRepository) DeleteUserByID(id int) error {
+	var idx = fake.DeleteUserByIDCount
+	if fake.DeleteUserByIDCount >= len(fake.FDeleteUserByID) {
+		idx = len(fake.FDeleteUserByID) - 1
 	}
-	if len(f.FDeleteUserByID) != 0 {
-		o1 := f.FDeleteUserByID[idx](id)
-		f.DeleteUserByIDCount++
+	if len(fake.FDeleteUserByID) != 0 {
+		o1 := fake.FDeleteUserByID[idx](id)
+		fake.DeleteUserByIDCount++
 		return o1
 	}
 	return nil
 }
 
-func (f *FakeUserRepository) UpdateUser(old, new User) error {
-	var idx = f.UpdateUserCount
-	if f.UpdateUserCount >= len(f.FUpdateUser) {
-		idx = len(f.FUpdateUser) - 1
+func (fake *FakeUserRepository) UpdateUser(old, new User) error {
+	var idx = fake.UpdateUserCount
+	if fake.UpdateUserCount >= len(fake.FUpdateUser) {
+		idx = len(fake.FUpdateUser) - 1
 	}
-	if len(f.FUpdateUser) != 0 {
-		o1 := f.FUpdateUser[idx](old, new)
-		f.UpdateUserCount++
+	if len(fake.FUpdateUser) != 0 {
+		o1 := fake.FUpdateUser[idx](old, new)
+		fake.UpdateUserCount++
 		return o1
 	}
 	return nil
 }
 
-func (f *FakeUserRepository) Execute(user User) error {
-	var idx = f.ExecuteCount
-	if f.ExecuteCount >= len(f.FExecute) {
-		idx = len(f.FExecute) - 1
+func (fake *FakeUserRepository) Execute(user User) error {
+	var idx = fake.ExecuteCount
+	if fake.ExecuteCount >= len(fake.FExecute) {
+		idx = len(fake.FExecute) - 1
 	}
-	if len(f.FExecute) != 0 {
-		o1 := f.FExecute[idx](user)
-		f.ExecuteCount++
+	if len(fake.FExecute) != 0 {
+		o1 := fake.FExecute[idx](user)
+		fake.ExecuteCount++
 		return o1
 	}
 	return nil
 }
 
-func (f *FakeUserRepository) FindUserByName(name string) (User, error) {
-	var idx = f.FindUserByNameCount
-	if f.FindUserByNameCount >= len(f.FFindUserByName) {
-		idx = len(f.FFindUserByName) - 1
+func (fake *FakeUserRepository) FindUserByName(name string) (User, error) {
+	var idx = fake.FindUserByNameCount
+	if fake.FindUserByNameCount >= len(fake.FFindUserByName) {
+		idx = len(fake.FFindUserByName) - 1
 	}
-	if len(f.FFindUserByName) != 0 {
-		o1, o2 := f.FFindUserByName[idx](name)
-		f.FindUserByNameCount++
+	if len(fake.FFindUserByName) != 0 {
+		o1, o2 := fake.FFindUserByName[idx](name)
+		fake.FindUserByNameCount++
 		return o1, o2
 	}
 	return User{}, nil

@@ -25,7 +25,7 @@ func ParseAndGenerate(input string, interfaceNames []string, output string) erro
 	}
 	packageName := getPackageName(node)
 	slog.Debug("package name", slog.String("name", packageName))
-	interfaces := getInterfaceInfo(node)
+	interfaces := getInterfaceInfo(node, interfaceNames)
 	igi := InterfaceGenInfo{
 		filename:   input,
 		pkg:        packageName,
@@ -230,7 +230,7 @@ func writeFakeMethods(w io.StringWriter, i InterfaceInfo) {
 }
 
 func writeFakeMethod(w io.StringWriter, iName string, m FunctionInfo) {
-	write(w, fmt.Sprintf("func (f *Fake%s) %s(", iName, m.Name))
+	write(w, fmt.Sprintf("func (fake *Fake%s) %s(", iName, m.Name))
 	for i, p := range m.Params {
 		if len(p.Name) != 0 {
 			write(w, fmt.Sprintf("%s %s", paramString(p), p.TypeString()))
@@ -260,14 +260,14 @@ func writeFakeMethod(w io.StringWriter, iName string, m FunctionInfo) {
 		write(w, fmt.Sprintf("%s %s", paramString(r), r.TypeString()))
 	}
 	write(w, ") {\n")
-	write(w, fmt.Sprintf("\t var idx = f.%sCount\n", m.Name))
-	write(w, fmt.Sprintf("\tif f.%sCount >= len(f.F%s) {\n", m.Name, m.Name))
-	write(w, fmt.Sprintf("\t idx = len(f.F%s) - 1\n", m.Name))
+	write(w, fmt.Sprintf("\t var idx = fake.%sCount\n", m.Name))
+	write(w, fmt.Sprintf("\tif fake.%sCount >= len(fake.F%s) {\n", m.Name, m.Name))
+	write(w, fmt.Sprintf("\t idx = len(fake.F%s) - 1\n", m.Name))
 	write(w, "\t}\n")
 	// write(w, fmt.Sprintf("\tif f.%sCount >= len(f.F%s) {\n", m.Name, m.Name))
 	// write(w, "\t f.t.Fatalf(\"too many calls to "+m.Name+" expected %d calls got %d \", "+fmt.Sprintf("f.%sCount, f.%sCount + 1)", m.Name, m.Name)+"\n")
 	// write(w, "\t}\n")
-	write(w, "\tif len(f.F")
+	write(w, "\tif len(fake.F")
 	write(w, m.Name)
 	write(w, ") != 0 {\n")
 	for i, p := range m.Results {
@@ -280,7 +280,7 @@ func writeFakeMethod(w io.StringWriter, iName string, m FunctionInfo) {
 		}
 		write(w, p.Name...)
 	}
-	write(w, " := f.F")
+	write(w, " := fake.F")
 	write(w, m.Name)
 	write(w, "[idx](")
 	for i, p := range m.Params {
@@ -296,7 +296,7 @@ func writeFakeMethod(w io.StringWriter, iName string, m FunctionInfo) {
 		write(w, p.Name...)
 	}
 	write(w, ")\n")
-	write(w, fmt.Sprintf("\tf.%sCount++\n", m.Name))
+	write(w, fmt.Sprintf("\tfake.%sCount++\n", m.Name))
 	write(w, "return ")
 	for i, p := range m.Results {
 		if i != 0 {
@@ -419,7 +419,7 @@ func (p ParamInfo) ZeroValue() string {
 	}
 }
 
-func getInterfaceInfo(node *ast.File) []InterfaceInfo {
+func getInterfaceInfo(node *ast.File, ifnames []string) []InterfaceInfo {
 	var (
 		interfaces = make(map[string]InterfaceInfo)
 	)
@@ -429,6 +429,9 @@ func getInterfaceInfo(node *ast.File) []InterfaceInfo {
 			for _, spec := range genDecl.Specs {
 				if tSpec, ok := spec.(*ast.TypeSpec); ok {
 					if iType, ok := tSpec.Type.(*ast.InterfaceType); ok {
+						if !slices.Contains(ifnames, tSpec.Name.Name) {
+							continue
+						}
 						iInfo := InterfaceInfo{
 							Name:       tSpec.Name.Name,
 							Composites: []string{},
