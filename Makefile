@@ -4,19 +4,19 @@ default: help
 VERSION := $(shell git describe --tags --abbrev=0)
 LDFLAGS := -ldflags "-X main.version=$(VERSION)"
 
-build: test lint
+build: generate test lint
 	go mod tidy && go build $(LDFLAGS) --tags prod -o bin/ffakes ffakes.go
 
 build-all: build-mac build-linux build-windows
 
-build-mac: test lint
-	GOOS=darwin GOARCH=amd64 go mod tidy && go build -o dist/mac/ffakes ffakes.go
+build-mac: build
+	GOOS=darwin GOARCH=amd64 go mod tidy && go build $(LDFLAGS) --tags prod -o bin/ffakes ffakes.go
 
-build-linux: test lint
-	GOOS=linux GOARCH=amd64 go mod tidy && go build -o dist/linux/ffakes ffakes.go
+build-linux: build
+	GOOS=linux GOARCH=amd64 go mod tidy && go build $(LDFLAGS) --tags prod -o bin/ffakes ffakes.go
 
-build-windows: test lint
-	GOOS=windows GOARCH=amd64 go mod tidy && go build -o dist/windows/ffakes.exe ffakes.go
+build-windows: build
+	GOOS=windows GOARCH=amd64 go mod tidy && go build $(LDFLAGS) --tags prod -o bin/ffakes ffakes.go
 
 releases: build-all
 	@echo "Creating releases"
